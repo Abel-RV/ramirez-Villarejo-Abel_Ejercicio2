@@ -18,6 +18,5 @@ public record ReservaRequest(
         @NotBlank String motivo,
         @NotNull Integer numeroAsistentes,
         Long aulaId,
-        Long usuarioId,
-        List<Long> horarioId){
+        Long usuarioId){
 }

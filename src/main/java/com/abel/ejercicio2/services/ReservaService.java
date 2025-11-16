@@ -2,8 +2,12 @@ package com.abel.ejercicio2.services;
 
 import com.abel.ejercicio2.beans.CopiarClase;
 import com.abel.ejercicio2.dto.request.ReservaRequest;
+import com.abel.ejercicio2.entities.Aula;
 import com.abel.ejercicio2.entities.Reserva;
+import com.abel.ejercicio2.entities.Usuario;
+import com.abel.ejercicio2.repositories.AulaRepository;
 import com.abel.ejercicio2.repositories.ReservaRepository;
+import com.abel.ejercicio2.repositories.UsuarioRepository;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,8 @@ import java.util.Optional;
 public class ReservaService {
     private final CopiarClase copiarClase = new CopiarClase();
     private final ReservaRepository reservaRepository;
+    private final AulaRepository aulaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public List<Reserva> obtenerTodasReservas() {
         return reservaRepository.findAll();
@@ -29,7 +35,14 @@ public class ReservaService {
     }
 
     public Reserva guardarReserva(ReservaRequest reservaRequest) {
+        Aula aula = aulaRepository.getReferenceById(reservaRequest.aulaId());
+        Usuario usuario = usuarioRepository.getReferenceById(reservaRequest.usuarioId());
         Reserva reserva = Reserva.builder()
+                .fecha(reservaRequest.fecha())
+                .motivo(reservaRequest.motivo())
+                .numeroAsistentes(reservaRequest.numeroAsistentes())
+                .aula(aula)
+                .usuario(usuario)
                 .build();
         return reservaRepository.save(reserva);
     }
