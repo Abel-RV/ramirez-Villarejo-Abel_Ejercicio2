@@ -1,6 +1,7 @@
 package com.abel.ejercicio2.services;
 
 import com.abel.ejercicio2.beans.CopiarClase;
+import com.abel.ejercicio2.dto.request.AulaRequest;
 import com.abel.ejercicio2.entities.Aula;
 import com.abel.ejercicio2.repositories.AulaRepository;
 import lombok.AllArgsConstructor;
@@ -38,7 +39,13 @@ public class AulaService {
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public Aula guardarAula(Aula aula) {
+    public Aula guardarAula(AulaRequest aulaRequest) {
+        Aula aula = Aula.builder()
+                .nombre(aulaRequest.nombre())
+                .capacidad(aulaRequest.capacidad())
+                .esAulaOrdenadores(aulaRequest.esAulaOrdenadores())
+                .numeroOrdenadores(aulaRequest.numeroOrdenadores())
+                .build();
         return aulaRepository.save(aula);
     }
 
@@ -47,7 +54,7 @@ public class AulaService {
     }
 
     @SneakyThrows
-    public ResponseEntity<Aula> actualizar(Aula aulaModificada, Long id) {
+    public ResponseEntity<Aula> actualizar(AulaRequest aulaModificada, Long id) {
         Optional<Aula> aulaExistente = aulaRepository.findById(id);
         if (aulaExistente.isPresent()) {
             Aula aula = aulaExistente.get();
