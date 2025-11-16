@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, DoorOpen, LogIn, LogOut, Plus, Trash2, Edit, X } from 'lucide-react';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'https://ramirezvillarejoabel-reservaaulas.onrender.com';
 
 export default function ReservasAulasApp() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
