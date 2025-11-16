@@ -35,7 +35,7 @@ public class SecurityConfig {
                 // Configurar autorización de peticiones HTTP
                 // Define qué rutas son públicas y cuáles requieren autenticación
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()  // /auth/login y /auth/register son públicos
+                        .requestMatchers("/auth/**", "/").permitAll()  // /auth/login y /auth/register son públicos
                         .anyRequest().authenticated()              // Todas las demás rutas requieren autenticación
                 )
 
