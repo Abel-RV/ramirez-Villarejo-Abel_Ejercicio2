@@ -84,4 +84,15 @@ public class SecurityConfig {
         // Necesario para validar email/password en el login
         return authConfig.getAuthenticationManager();
     }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll() // Permite todas las peticiones
+                )
+                .csrf(csrf -> csrf.disable()); // Deshabilita CSRF (común para APIs)
+
+        return http.build();
+    }
 }
