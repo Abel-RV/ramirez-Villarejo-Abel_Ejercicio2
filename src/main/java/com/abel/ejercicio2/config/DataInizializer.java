@@ -16,14 +16,19 @@ public class DataInizializer {
 
     @PostConstruct
     public void init(){
-        Usuario usuario = Usuario.builder()
-                .nombre("admin")
-                .apellidos("admin")
-                .email("admin@gmail.com")
-                .password(encoder.encode("admin1234"))
-                .roles("ROLE_ADMIN")
-                .build();
+        if (usuarioRepository.findByEmail("admin@gmail.com").isEmpty()) {
+            Usuario usuario = Usuario.builder()
+                    .nombre("admin")
+                    .apellidos("admin")
+                    .email("admin@gmail.com")
+                    .password(encoder.encode("admin1234"))
+                    .roles("ROLE_ADMIN")
+                    .build();
 
-        usuarioRepository.save(usuario);
+            usuarioRepository.save(usuario);
+            System.out.println("Usuario ADMIN creado: admin@gmail.com / admin1234");
+        } else {
+            System.out.println("Usuario ADMIN ya existe");
+        }
     }
 }
