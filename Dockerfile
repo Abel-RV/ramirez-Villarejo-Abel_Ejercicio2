@@ -1,5 +1,5 @@
 # ETAPA 1: Compilar con Maven
-FROM maven:3.9.5-eclipse-temurin-17 AS build
+FROM maven:3.9.5-eclipse-temurin-21 AS build
 # ↑ Usa Maven + Java 17 (Temurin = OpenJDK oficial)
 
 WORKDIR /app
@@ -9,7 +9,7 @@ RUN mvn clean package -DskipTests
 # ↑ Compila tu proyecto Spring Boot
 
 # ETAPA 2: Ejecutar la aplicación
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 # ↑ Usa solo Java Runtime (más ligero)
 
 WORKDIR /app
