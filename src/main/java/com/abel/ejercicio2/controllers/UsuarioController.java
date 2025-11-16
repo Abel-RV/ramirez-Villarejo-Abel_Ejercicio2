@@ -25,10 +25,4 @@ public class UsuarioController {
     public ResponseEntity<Void> BorrarUsuario(@PathVariable Long id) {
         return usuarioService.eliminarUsuario(id);
     }
-
-    /*@PreAuthorize("hasRole('ADMIN')")
-    @PathVariable("")
-    public ResponseEntity<?> cambiarPassword(){
-
-    }*/
 }

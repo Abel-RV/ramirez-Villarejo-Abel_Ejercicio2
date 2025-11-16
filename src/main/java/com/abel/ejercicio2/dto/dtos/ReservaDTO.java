@@ -15,7 +15,7 @@ public record ReservaDTO(
         , String motivo,
         Integer numeroAsistentes,
         LocalDate fechaCreacion,
-        AulaDTO aula,
-        UsuarioDto usuario,
+        Long aula,
+        Long usuario,
         List<HorarioDTO> horario){
 }
