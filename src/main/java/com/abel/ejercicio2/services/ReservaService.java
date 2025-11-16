@@ -1,6 +1,7 @@
 package com.abel.ejercicio2.services;
 
 import com.abel.ejercicio2.beans.CopiarClase;
+import com.abel.ejercicio2.dto.request.ReservaRequest;
 import com.abel.ejercicio2.entities.Reserva;
 import com.abel.ejercicio2.repositories.ReservaRepository;
 import lombok.AllArgsConstructor;
@@ -27,23 +28,31 @@ public class ReservaService {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public Reserva guardarReserva(Reserva reserva) {
+    public Reserva guardarReserva(ReservaRequest reservaRequest) {
+        Reserva reserva = Reserva.builder()
+                .build();
         return reservaRepository.save(reserva);
     }
 
-    public void eliminar(Long id) {
+    public ResponseEntity<Void> eliminar(Long id) {
+        Optional<Reserva> reservaOpt = reservaRepository.findById(id);
+        if(!reservaOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
         reservaRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @SneakyThrows
-    public ResponseEntity<Reserva> actualizar(Reserva reservaModificada, Long id) {
+    public ResponseEntity<Reserva> actualizar(ReservaRequest reservaModificada, Long id) {
         Optional<Reserva> reservaExistente = reservaRepository.findById(id);
-        if (reservaExistente.isPresent()) {
-            Reserva reserva = reservaExistente.get();
-            copiarClase.copyProperties(reserva, reservaModificada);
-            Reserva reservaActualizada = reservaRepository.save(reserva);
-            return ResponseEntity.ok(reservaActualizada);
+        if (!reservaExistente.isPresent()) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        Reserva reserva = reservaExistente.get();
+        copiarClase.copyProperties(reserva, reservaModificada);
+        Reserva reservaActualizada = reservaRepository.save(reserva);
+        return ResponseEntity.ok(reservaActualizada);
+
     }
 }

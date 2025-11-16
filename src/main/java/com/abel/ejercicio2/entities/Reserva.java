@@ -2,16 +2,14 @@ package com.abel.ejercicio2.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "Reserva")
@@ -41,5 +39,5 @@ public class Reserva {
 
     @OneToMany(mappedBy = "reserva",cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JsonIgnoreProperties("reserva")
-    private List<TramoHorario> tramoHorario;
+    private List<Horario> horario;
 }
