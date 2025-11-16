@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Users, DoorOpen, LogIn, LogOut, Plus, Trash2, Edit, X } from 'lucide-react';
 
 const API_URL = 'https://ramirezvillarejoabel-reservaaulas.onrender.com';
 
@@ -15,7 +14,7 @@ export default function ReservasAulasApp() {
   // Forms
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ email: '', password: '', nombre: '', apellidos: '' });
-  const [aulaForm, setAulaForm] = useState({ nombre: '', capacidad: '', esAulaOrdenadores: false, numeroOrdenadores: 0 });
+    const [aulaForm, setAulaForm] = useState({ nombre: '', capacidad: '', esAulaOrdenadores: false, numeroOrdenadores: '' });
   const [reservaForm, setReservaForm] = useState({ fecha: '', motivo: '', numeroAsistentes: '', aulaId: '', usuarioId: '', horarioId: [] });
 
   useEffect(() => {
@@ -131,7 +130,7 @@ export default function ReservasAulasApp() {
       if (res.ok) {
         mostrarMensaje('success', 'Aula creada correctamente');
         cargarDatos();
-        setAulaForm({ nombre: '', capacidad: '', esAulaOrdenadores: false, numeroOrdenadores: 0 });
+          setAulaForm({ nombre: '', capacidad: '', esAulaOrdenadores: false, numeroOrdenadores: '' });
       } else {
         mostrarMensaje('error', 'Error al crear aula');
       }
