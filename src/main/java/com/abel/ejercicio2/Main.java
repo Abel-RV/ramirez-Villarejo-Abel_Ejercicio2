@@ -19,7 +19,7 @@ public class Main {
 			@Override
 			public void addCorsMappings( @NonNull CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedOrigins("https://ramirez-villarejo-abel-ejercicio2.onrender.com")
+						.allowedOrigins("*")
 						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 						.allowedHeaders("*")
 						.maxAge(3600);

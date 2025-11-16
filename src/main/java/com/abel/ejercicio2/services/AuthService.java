@@ -72,6 +72,8 @@ public class AuthService {
             usuario.setPassword(passwordEncoder.encode(registerRequest.password()));  // Cifrar password
             usuario.setRoles("ROLE_PROFESOR");  // Rol por defecto
 
+            usuario.setNombre(registerRequest.nombre());
+            usuario.setApellidos(registerRequest.apellidos());
 
             usuarioRepository.save(usuario);
 
