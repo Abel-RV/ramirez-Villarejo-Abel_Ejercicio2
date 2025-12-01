@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reservas de Aulas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .status-online {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-offline {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-loading {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: #6b7280;
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .profile-field {
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .profile-field strong {
+            display: block;
+            color: #6b7280;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .profile-field span {
+            color: #111827;
+            font-size: 1.1em;
+        }
+
+        .aulas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .aula-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .aula-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .aula-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .aula-info {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .aula-info span {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .flex-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-user {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .api-config {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .api-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .api-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-option input[type="radio"] {
+            width: auto;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏫 Sistema de Reservas de Aulas</h1>
+            <div class="status-indicator" id="apiStatus">
+                <span class="status-offline">✗ API Desconectada</span>
+            </div>
+        </header>
+
+        <!-- Sección de Autenticación -->
+        <section id="authSection" class="card">
+            <div id="alertContainer"></div>
+
+            <div class="api-config">
+                <label><strong>⚙️ Configuración de la API</strong></label>
+                
+                <div class="api-options">
+                    <div class="api-option">
+                        <input type="radio" id="apiRender" name="apiChoice" value="render" checked>
+                        <label for="apiRender">Servidor en Render (Producción)</label>
+                    </div>
+                    <div class="api-option">
+                        <input type="radio" id="apiLocal" name="apiChoice" value="local">
+                        <label for="apiLocal">Servidor Local (localhost:8080)</label>
+                    </div>
+                    <div class="api-option">
+                        <input type="radio" id="apiCustom" name="apiChoice" value="custom">
+                        <label for="apiCustom">URL Personalizada:</label>
+                    </div>
+                </div>
+
+                <input type="text" id="apiUrl" placeholder="https://tu-api-personalizada.com" style="margin-top: 10px;">
+                
+                <div class="connection-status" id="connectionInfo">
+                    <span>URL actual: <code id="currentUrl">https://ramirez-villarejo-abel-ejercicio2.onrender.com</code></span>
+                </div>
+
+                <button onclick="testConnection()">🔄 Probar Conexión</button>
+                <button class="secondary" onclick="wakeUpRender()">⏰ Despertar Servidor Render</button>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Importante:</strong> Los servidores gratuitos de Render se duermen tras 15 min de inactividad. 
+                La primera petición puede tardar <strong>30-60 segundos</strong> en responder. 
+                Usa el botón "Despertar Servidor" si ves errores de conexión.
+            </div>
+
+            <div class="flex-header">
+                <h2 id="authTitle">Iniciar Sesión</h2>
+                <button class="secondary" onclick="toggleAuthMode()">
+                    <span id="toggleBtn">Crear cuenta</span>
+                </button>
+            </div>
+
+            <form id="authForm">
+                <div id="registerFields" class="hidden">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" placeholder="Juan">
+                    </div>
+                    <div class="form-group">
+                        <label for="apellidos">Apellidos:</label>
+                        <input type="text" id="apellidos" placeholder="García López">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" value="admin@gmail.com" placeholder="usuario@ejemplo.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" value="admin1234" placeholder="Mínimo 3 caracteres" required>
+                </div>
+
+                <button type="submit" id="authSubmitBtn">Iniciar Sesión</button>
+            </form>
+        </section>
+
+        <!-- Sección del Dashboard -->
+        <section id="dashboardSection" class="hidden">
+            <div class="card">
+                <div class="flex-header">
+                    <h2>👤 Mi Perfil</h2>
+                    <button class="danger" onclick="logout()">Cerrar Sesión</button>
+                </div>
+                <div id="profileInfo" class="loading">Cargando perfil</div>
+            </div>
+
+            <div class="card">
+                <div class="flex-header">
+                    <h2>🚪 Aulas Disponibles</h2>
+                    <button onclick="loadAulas()">🔄 Recargar</button>
+                </div>
+                <div id="aulasContainer" class="loading">Cargando aulas</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Configuración
+        const TOKEN_KEY = 'jwtTokenReservas';
+        const RENDER_URL = 'https://ramirez-villarejo-abel-ejercicio2.onrender.com';
+        const LOCAL_URL = 'http://localhost:8080';
+        
+        let API_BASE_URL = RENDER_URL;
+        let currentToken = localStorage.getItem(TOKEN_KEY);
+        let isRegisterMode = false;
+
+        // Elementos DOM
+        const authSection = document.getElementById('authSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const authForm = document.getElementById('authForm');
+        const alertContainer = document.getElementById('alertContainer');
+        const apiStatus = document.getElementById('apiStatus');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const currentUrlDisplay = document.getElementById('currentUrl');
+
+        // Manejar cambio de API
+        document.querySelectorAll('input[name="apiChoice"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                switch(e.target.value) {
+                    case 'render':
+                        API_BASE_URL = RENDER_URL;
+                        apiUrlInput.disabled = true;
+                        break;
+                    case 'local':
+                        API_BASE_URL = LOCAL_URL;
+                        apiUrlInput.disabled = true;
+                        break;
+                    case 'custom':
+                        API_BASE_URL = apiUrlInput.value || RENDER_URL;
+                        apiUrlInput.disabled = false;
+                        apiUrlInput.focus();
+                        break;
+                }
+                currentUrlDisplay.textContent = API_BASE_URL;
+                localStorage.setItem('apiUrl', API_BASE_URL);
+            });
+        });
+
+        apiUrlInput.addEventListener('input', (e) => {
+            if (document.getElementById('apiCustom').checked) {
+                API_BASE_URL = e.target.value.trim() || RENDER_URL;
+                currentUrlDisplay.textContent = API_BASE_URL;
+                localStorage.setItem('apiUrl', API_BASE_URL);
+            }
+        });
+
+        // Cargar configuración guardada
+        const savedUrl = localStorage.getItem('apiUrl');
+        if (savedUrl) {
+            if (savedUrl === LOCAL_URL) {
+                document.getElementById('apiLocal').checked = true;
+                API_BASE_URL = LOCAL_URL;
+            } else if (savedUrl === RENDER_URL) {
+                document.getElementById('apiRender').checked = true;
+                API_BASE_URL = RENDER_URL;
+            } else {
+                document.getElementById('apiCustom').checked = true;
+                apiUrlInput.value = savedUrl;
+                apiUrlInput.disabled = false;
+                API_BASE_URL = savedUrl;
+            }
+            currentUrlDisplay.textContent = API_BASE_URL;
+        }
+
+        // Mostrar alertas
+        function showAlert(message, type = 'error') {
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                if (type !== 'error') {
+                    alertContainer.innerHTML = '';
+                }
+            }, 8000);
+        }
+
+        // Despertar servidor de Render
+        async function wakeUpRender() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Despertando servidor...';
+            
+            showAlert('⏰ Intentando despertar el servidor... Esto puede tardar 30-60 segundos.', 'warning');
+            apiStatus.innerHTML = '<span class="status-loading">⏳ Despertando servidor...</span>';
+
+            try {
+                // Intentar múltiples veces con timeout largo
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 segundos
+
+                const response = await fetch(`${RENDER_URL}/aula`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok || response.status === 401 || response.status === 403) {
+                    apiStatus.innerHTML = '<span class="status-online">✓ API Conectada</span>';
+                    showAlert('✅ Servidor despierto y listo. Ahora puedes iniciar sesión.', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showAlert('⏱️ Tiempo de espera agotado. El servidor puede estar caído o muy lento. Intenta de nuevo en 1 minuto.', 'error');
+                } else {
+                    showAlert(`❌ No se pudo despertar el servidor: ${error.message}`, 'error');
+                }
+                apiStatus.innerHTML = '<span class="status-offline">✗ API Desconectada</span>';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⏰ Despertar Servidor Render';
+            }
+        }
+
+        // Probar conexión con la API
+        async function testConnection() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Probando...';
+            
+            apiStatus.innerHTML = '<span class="status-loading">⏳ Probando conexión...</span>';
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                const response = await fetch(`${API_BASE_URL}/aula`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                clearTimeout(timeoutId);
+                
+                if (response.ok || response.status === 401 || response.status === 403) {
+                    apiStatus.innerHTML = '<span class="status-online">✓ API Conectada</span>';
+                    showAlert('✅ Conexión exitosa con la API', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                apiStatus.innerHTML = '<span class="status-offline">✗ API Desconectada</span>';
+                
+                if (error.name === 'AbortError') {
+                    showAlert('⏱️ Tiempo de espera agotado. Si usas Render, el servidor puede estar dormido. Usa el botón "Despertar Servidor".', 'error');
+                } else {
+                    let errorMsg = `❌ Error de conexión: ${error.message}. `;
+                    
+                    if (API_BASE_URL.includes('localhost')) {
+                        errorMsg += '<br><br><strong>Servidor Local:</strong> Asegúrate de que Spring Boot está corriendo en el puerto 8080.<br>Ejecuta: <code>./mvnw spring-boot:run</code>';
+                    } else {
+                        errorMsg += '<br><br><strong>Servidor Render:</strong> Probablemente está dormido. Usa el botón "Despertar Servidor" y espera 30-60 segundos.';
+                    }
+                    
+                    showAlert(errorMsg, 'error');
+                }
+                console.error('Error:', error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔄 Probar Conexión';
+            }
+        }
+
+        // Alternar entre login y registro
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            const registerFields = document.getElementById('registerFields');
+            const authTitle = document.getElementById('authTitle');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const submitBtn = document.getElementById('authSubmitBtn');
+
+            if (isRegisterMode) {
+                registerFields.classList.remove('hidden');
+                authTitle.textContent = 'Crear Cuenta';
+                toggleBtn.textContent = 'Ya tengo cuenta';
+                submitBtn.textContent = 'Registrarse';
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+            } else {
+                registerFields.classList.add('hidden');
+                authTitle.textContent = 'Iniciar Sesión';
+                toggleBtn.textContent = 'Crear cuenta';
+                submitBtn.textContent = 'Iniciar Sesión';
+            }
+            alertContainer.innerHTML = '';
+        }
+
+        // Manejar autenticación
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const submitBtn = document.getElementById('authSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Procesando...';
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+                if (isRegisterMode) {
+                    const nombre = document.getElementById('nombre').value;
+                    const apellidos = document.getElementById('apellidos').value;
+                    
+                    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                        method: 'POST',
+                        signal: controller.signal,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, nombre, apellidos })
+                    });
+
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showAlert('✅ Cuenta creada exitosamente. Por favor, inicia sesión.', 'success');
+                        toggleAuthMode();
+                        document.getElementById('email').value = email;
+                    } else {
+                        throw new Error(data.error || data.message || 'Error en el registro');
+                    }
+                } else {
+                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'POST',
+                        signal: controller.signal,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+
+                    if (response.ok && data.token) {
+                        currentToken = data.token;
+                        localStorage.setItem(TOKEN_KEY, currentToken);
+                        showAlert('✅ Inicio de sesión exitoso', 'success');
+                        setTimeout(() => loadDashboard(), 500);
+                    } else {
+                        throw new Error(data.error || data.message || 'Credenciales incorrectas');
+                    }
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showAlert('⏱️ Tiempo de espera agotado. El servidor puede estar dormido. Usa el botón "Despertar Servidor".', 'error');
+                } else {
+                    showAlert(`❌ Error: ${error.message}`, 'error');
+                }
+                console.error('Error de autenticación:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = isRegisterMode ? 'Registrarse' : 'Iniciar Sesión';
+            }
+        });
+
+        // Cargar perfil
+        async function loadProfile() {
+            const profileInfo = document.getElementById('profileInfo');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/perfil`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const profile = await response.json();
+                    const isAdmin = profile.roles && profile.roles.includes('ADMIN');
+                    
+                    profileInfo.innerHTML = `
+                        <div class="profile-info">
+                            <div class="profile-field">
+                                <strong>ID</strong>
+                                <span>${profile.id}</span>
+                            </div>
+                            <div class="profile-field">
+                                <strong>Nombre</strong>
+                                <span>${profile.nombre || 'N/A'} ${profile.apellidos || ''}</span>
+                            </div>
+                            <div class="profile-field">
+                                <strong>Email</strong>
+                                <span>${profile.email}</span>
+                            </div>
+                            <div class="profile-field">
+                                <strong>Rol</strong>
+                                <span class="badge ${isAdmin ? 'badge-admin' : 'badge-user'}">
+                                    ${profile.roles || 'USER'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    return true;
+                } else if (response.status === 401 || response.status === 403) {
+                    throw new Error('Sesión expirada');
+                } else {
+                    throw new Error(`Error ${response.status}`);
+                }
+            } catch (error) {
+                profileInfo.innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+                if (error.message === 'Sesión expirada') {
+                    setTimeout(() => logout(), 2000);
+                }
+                return false;
+            }
+        }
+
+        // Cargar aulas
+        async function loadAulas() {
+            const aulasContainer = document.getElementById('aulasContainer');
+            aulasContainer.innerHTML = '<div class="loading">Cargando aulas</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/aula`, {
+                    headers: { 
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const aulas = await response.json();
+                    
+                    if (aulas.length === 0) {
+                        aulasContainer.innerHTML = '<div class="alert alert-warning">No hay aulas registradas en el sistema.</div>';
+                        return;
+                    }
+
+                    aulasContainer.innerHTML = `
+                        <div class="aulas-grid">
+                            ${aulas.map(aula => `
+                                <div class="aula-card">
+                                    <h3>${aula.nombre}</h3>
+                                    <div class="aula-info">
+                                        <span>👥 Capacidad: ${aula.capacidad}</span>
+                                    </div>
+                                    <div class="aula-info">
+                                        <span>${aula.esAulaOrdenadores ? '💻' : '📚'} ${aula.esAulaOrdenadores ? 'Aula de Ordenadores' : 'Aula Normal'}</span>
+                                    </div>
+                                    ${aula.esAulaOrdenadores ? `
+                                        <div class="aula-info">
+                                            <span>🖥️ ${aula.numeroOrdenadores} ordenadores</span>
+                                        </div>
+                                    ` : ''}
+                                    <div class="aula-info">
+                                        <span>ID: ${aula.id}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (response.status === 401 || response.status === 403) {
+                    throw new Error('No autorizado para ver las aulas');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Error ${response.status}`);
+                }
+            } catch (error) {
+                aulasContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        ❌ Error al cargar aulas: ${error.message}
+                        <br><small>Verifica que estés autenticado correctamente y que la API esté funcionando.</small>
+                    </div>
+                `;
+                console.error('Error cargando aulas:', error);
+            }
+        }
+
+        // Cargar dashboard
+        async function loadDashboard() {
+            authSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            
+            const profileLoaded = await loadProfile();
+            if (profileLoaded) {
+                await loadAulas();
+            }
+        }
+
+        // Cerrar sesión
+        function logout() {
+            currentToken = null;
+            localStorage.removeItem(TOKEN_KEY);
+            authSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+            document.getElementById('password').value = '';
+            alertContainer.innerHTML = '';
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            if (currentToken) {
+                loadDashboard();
+            }
+        });
+    </script>
+</body>
+</html>
